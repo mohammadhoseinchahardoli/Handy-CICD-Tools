@@ -1,0 +1,36 @@
+version: "3"
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:14.1.0-ce.0'
+    restart: always
+    hostname: 'gitlab.example.com'
+    container_name: 'gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.example.com'
+        gitlab_pages['enable'] = false
+        gitlab_pages['inplace_chroot'] = true
+        gitlab_rails['smtp_enable'] = true
+        letsencrypt['enable'] = true
+        nginx['redirect_http_to_https'] = true
+    ports:
+      - '80:80'
+      - '22:22'
+      - '443:443'
+    volumes:
+      - 'config:/etc/gitlab'
+      - 'logs:/var/log/gitlab'
+      - 'data:/var/opt/gitlab'
+  runner:
+    image: gitlab/gitlab-runner:latest
+    restart: always
+    hostname: 'runner.example.com'
+    container_name: 'runner'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runnerconfig:/etc/gitlab-runner:z
+volumes:
+  runnerconfig:
+  config:
+  logs:
+  data:
